@@ -13,15 +13,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateAppointmentRequest {
-    @JsonProperty("bicycle_name")
+    @JsonProperty
     private String bicycleName;
 
-    @JsonProperty("description")
+    @JsonProperty
     private String description;
 
-    @JsonProperty("date_time")
+    @JsonProperty
     private LocalDateTime dateTime;
 
-    @JsonProperty("attachment")
+    @JsonProperty
     private String attachment;
 }
