@@ -4,7 +4,6 @@ import com.example.eindopdracht_backend_ipmroved.dto.requests.CreateAppointmentR
 import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateAppointmentRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.AppointmentResponse;
 import com.example.eindopdracht_backend_ipmroved.service.AppointmentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +14,11 @@ import java.util.List;
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService service;
+    private final AppointmentService service;
+
+    public AppointmentController(AppointmentService service) {
+        this.service = service;
+    }
 
     @GetMapping("/all")
     public ResponseEntity<List<AppointmentResponse>> getAllAppointments(Authentication authentication) {

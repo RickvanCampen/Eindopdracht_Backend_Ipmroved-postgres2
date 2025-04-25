@@ -5,7 +5,6 @@ import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateUserRoleRequ
 import com.example.eindopdracht_backend_ipmroved.dto.responses.AppointmentResponse;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.UserResponse;
 import com.example.eindopdracht_backend_ipmroved.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,8 +17,11 @@ import java.util.List;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
-    @Autowired
-    private AdminService service;
+    private final AdminService service;
+
+    public AdminController(AdminService service) {
+        this.service = service;
+    }
 
     @GetMapping("/details/{username}")
     public ResponseEntity<UserResponse> getUserProfile(

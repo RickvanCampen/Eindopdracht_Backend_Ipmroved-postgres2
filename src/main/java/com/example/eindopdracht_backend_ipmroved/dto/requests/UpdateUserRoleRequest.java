@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateUserRoleRequest {
-    private Role role;  // De rol als een Role type
+    private Role role;
 }

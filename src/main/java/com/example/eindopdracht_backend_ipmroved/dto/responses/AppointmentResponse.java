@@ -32,21 +32,19 @@ public class AppointmentResponse {
     private String username;
 
     @JsonProperty("attachment")
-    private String attachment;  // Dit blijft een String (base64-gecodeerde string)
+    private String attachment;
 
-    // Pas de from-methode aan zodat deze enkel de Appointment accepteert
     public static AppointmentResponse from(Appointment appointment) {
-        // Converteer byte[] naar base64 String (indien attachment niet null is)
         String attachmentBase64 = appointment.getAttachment() != null ?
                 Base64.getEncoder().encodeToString(appointment.getAttachment()) : null;
 
         return AppointmentResponse.builder()
-                .id(appointment.getId()) // Zorgt ervoor dat het ID wordt meegenomen
+                .id(appointment.getId())
                 .bicycleName(appointment.getBicycle_name())
                 .description(appointment.getDescription())
                 .dateTime(appointment.getDate_time())
-                .username(appointment.getUser().getUsername()) // Haalt de username uit de User in Appointment
-                .attachment(attachmentBase64) // Converteer naar base64 en voeg toe
+                .username(appointment.getUser().getUsername())
+                .attachment(attachmentBase64)
                 .build();
     }
 }

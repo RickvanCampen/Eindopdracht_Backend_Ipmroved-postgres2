@@ -4,7 +4,6 @@ import com.example.eindopdracht_backend_ipmroved.models.User;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateUserRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.UserResponse;
 import com.example.eindopdracht_backend_ipmroved.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/user")
 public class UserController {
 
-    @Autowired
-    private UserService service;
+    private final UserService service;
+
+    public UserController(UserService service) {
+        this.service = service;
+    }
 
     @GetMapping("/details")
     public ResponseEntity<UserResponse> getUserProfile(Authentication authentication) {

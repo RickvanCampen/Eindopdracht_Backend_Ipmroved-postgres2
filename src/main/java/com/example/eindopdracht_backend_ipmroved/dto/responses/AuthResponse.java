@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)  // Voorkomt lege velden in JSON response
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
     private String message;
     private String token;
