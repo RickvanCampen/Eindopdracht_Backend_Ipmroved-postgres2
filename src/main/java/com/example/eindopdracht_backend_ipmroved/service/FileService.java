@@ -15,19 +15,19 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-    public File saveFile(MultipartFile file) throws IOException {
+    public File storeFile(MultipartFile file) throws IOException {  // Methode aangepast naar storeFile
         File fileEntity = new File();
         fileEntity.setFileName(file.getOriginalFilename());
         fileEntity.setFileType(file.getContentType());
         fileEntity.setSize(file.getSize());
         fileEntity.setData(file.getBytes());
-        fileEntity.setUploadTime(LocalDateTime.now());
+        fileEntity.setUploadTime(LocalDateTime.now());  // Stel de upload tijd in
 
-        return fileRepository.save(fileEntity);
+        return fileRepository.save(fileEntity);  // Sla bestand op in de database
     }
 
     public File getFileById(Long id) {
         return fileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bestand niet gevonden met ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Bestand niet gevonden met ID: " + id));  // Foutmelding als bestand niet gevonden wordt
     }
 }

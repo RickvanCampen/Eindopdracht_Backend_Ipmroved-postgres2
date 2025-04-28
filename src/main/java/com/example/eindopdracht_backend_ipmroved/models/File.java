@@ -16,17 +16,27 @@ public class File {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;  // Unieke ID voor het bestand
 
-    private String fileName;
+    @Column(name = "file_name", nullable = false)
+    private String fileName;  // Naam van het bestand
 
-    private String fileType;
+    @Column(name = "file_type", nullable = false)
+    private String fileType;  // Type van het bestand (bijv. 'image/jpeg')
 
-    private Long size;
+    @Column(name = "size", nullable = false)
+    private Long size;  // Grootte van het bestand in bytes
 
     @Lob
-    private byte[] data;
+    @Column(name = "data")
+    private byte[] data;  // De binaire data van het bestand
 
-    @Column(name = "upload_time")
-    private LocalDateTime uploadTime;
+    @Column(name = "upload_time", nullable = false, updatable = false)
+    private LocalDateTime uploadTime;  // Het tijdstip van uploaden
+
+    @PrePersist
+    public void prePersist() {
+        // Stel de upload_time in op het moment van aanmaken
+        this.uploadTime = LocalDateTime.now();
+    }
 }

@@ -20,7 +20,7 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            File savedFile = fileService.saveFile(file);
+            File savedFile = fileService.storeFile(file);  // Methode aangepast naar storeFile
             return ResponseEntity.ok("Bestand geüpload met ID: " + savedFile.getId());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload mislukt: " + e.getMessage());
