@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,70 +25,62 @@ public class AppointmentService {
     @Autowired
     private UserRepository userRepository;
 
-    @Transactional
+    // Ophalen van afspraken voor een specifieke gebruiker
+    @Transactional(readOnly = true)
     public List<AppointmentResponse> getAppointmentsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
         List<Appointment> appointments = appointmentRepository.findByUser(user);
         return appointments.stream()
-                .map(AppointmentResponse::from) // Alleen de Appointment doorgeven
+                .map(AppointmentResponse::from)
                 .collect(Collectors.toList());
     }
 
-    // Aanmaken van een afspraak
-    @Transactional  // Zorgt ervoor dat de operatie binnen een transactie plaatsvindt
+    // Aanmaken van een nieuwe afspraak
+    @Transactional
     public AppointmentResponse createAppointment(String username, CreateAppointmentRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
         Appointment appointment = Appointment.builder()
                 .bicycle_name(request.getBicycleName())
                 .description(request.getDescription())
                 .date_time(request.getDateTime())
+                .attachment(request.getAttachment()) // <-- Attachment zetten!
                 .user(user)
                 .build();
 
-        // Als er een bijlage is, decoderen en instellen
-        if (request.getAttachment() != null && !request.getAttachment().isEmpty()) {
-            appointment.setAttachment(Base64.getDecoder().decode(request.getAttachment()));
-        }
-
         Appointment savedAppointment = appointmentRepository.save(appointment);
-        return AppointmentResponse.from(savedAppointment); // Alleen de Appointment doorgeven
+        return AppointmentResponse.from(savedAppointment);
     }
 
-    // Bijwerken van een afspraak
-    @Transactional  // Zorgt ervoor dat de operatie binnen een transactie plaatsvindt
+    // Bijwerken van een bestaande afspraak
+    @Transactional
     public AppointmentResponse updateAppointment(String username, int id, UpdateAppointmentRequest request) {
-        // Haal de gebruiker op
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        // Haal de afspraak op die bij de gebruiker hoort
         Appointment appointment = appointmentRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException("Appointment not found", HttpStatus.NOT_FOUND));
 
-        // Werk de gegevens van de afspraak bij
         appointment.setBicycle_name(request.getBicycleName());
         appointment.setDescription(request.getDescription());
         appointment.setDate_time(request.getDateTime());
+        appointment.setAttachment(request.getAttachment()); // <-- Attachment bijwerken!
 
-        // Als er een bijlage is, werk deze dan bij
-        if (request.getAttachment() != null && !request.getAttachment().isEmpty()) {
-            appointment.setAttachment(Base64.getDecoder().decode(request.getAttachment()));
-        }
-
-        // Sla de bijgewerkte afspraak op in de database
         Appointment updatedAppointment = appointmentRepository.save(appointment);
-        return AppointmentResponse.from(updatedAppointment); // Alleen de Appointment doorgeven
+        return AppointmentResponse.from(updatedAppointment);
     }
 
     // Verwijderen van een afspraak
-    @Transactional  // Zorgt ervoor dat de operatie binnen een transactie plaatsvindt
+    @Transactional
     public void deleteAppointment(String username, int id) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
         Appointment appointment = appointmentRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException("Appointment not found", HttpStatus.NOT_FOUND));
+
         appointmentRepository.delete(appointment);
     }
 }

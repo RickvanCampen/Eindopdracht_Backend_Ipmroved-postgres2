@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Getter
 @Setter
@@ -35,16 +34,13 @@ public class AppointmentResponse {
     private String attachment;
 
     public static AppointmentResponse from(Appointment appointment) {
-        String attachmentBase64 = appointment.getAttachment() != null ?
-                Base64.getEncoder().encodeToString(appointment.getAttachment()) : null;
-
         return AppointmentResponse.builder()
                 .id(appointment.getId())
                 .bicycleName(appointment.getBicycle_name())
                 .description(appointment.getDescription())
                 .dateTime(appointment.getDate_time())
                 .username(appointment.getUser().getUsername())
-                .attachment(attachmentBase64)
+                .attachment(appointment.getAttachment())
                 .build();
     }
 }

@@ -33,8 +33,8 @@ public class Appointment {
     @JoinColumn(name="user_id")
     private User user;
 
-    @Lob
+
     @Column(name = "attachment")
-    private byte[] attachment;
+    private String attachment;
 }
 
