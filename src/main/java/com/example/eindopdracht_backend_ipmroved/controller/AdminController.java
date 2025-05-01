@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @RestController
@@ -45,6 +46,8 @@ public class AdminController {
         UserResponse response = UserResponse.from(updatedUser);
         return ResponseEntity.ok(response);
     }
+
+    @Transactional
     @GetMapping("/appointments/all")
     public ResponseEntity<List<AppointmentResponse>> getAllAppointments() {
         List<AppointmentResponse> appointments = service.getAllAppointments();
