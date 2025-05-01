@@ -1,3 +1,4 @@
+
 package com.example.eindopdracht_backend_ipmroved.config;
 
 import com.example.eindopdracht_backend_ipmroved.auth.JwtAuthenticationFilter;
@@ -30,6 +31,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
+                .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

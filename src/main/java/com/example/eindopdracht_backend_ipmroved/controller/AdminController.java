@@ -1,3 +1,4 @@
+
 package com.example.eindopdracht_backend_ipmroved.controller;
 
 import com.example.eindopdracht_backend_ipmroved.models.User;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
 
     private final AdminService service;
@@ -50,4 +51,6 @@ public class AdminController {
         return ResponseEntity.ok(appointments);
     }
 }
+
+
 

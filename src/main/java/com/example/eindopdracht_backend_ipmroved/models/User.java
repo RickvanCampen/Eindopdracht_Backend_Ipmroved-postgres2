@@ -1,3 +1,4 @@
+
 package com.example.eindopdracht_backend_ipmroved.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,7 +53,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override

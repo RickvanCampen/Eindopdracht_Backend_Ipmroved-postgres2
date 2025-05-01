@@ -1,3 +1,4 @@
+
 package com.example.eindopdracht_backend_ipmroved.service;
 
 import com.example.eindopdracht_backend_ipmroved.models.User;
@@ -43,7 +44,7 @@ public class JwtService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof User user) {
-            claims.put("role", user.getRole().name());
+            claims.put("role", "ROLE_" + user.getRole().name());
         }
         return generateToken(claims, userDetails);
     }
@@ -84,3 +85,5 @@ public class JwtService {
                 .getBody();
     }
 }
+
+
