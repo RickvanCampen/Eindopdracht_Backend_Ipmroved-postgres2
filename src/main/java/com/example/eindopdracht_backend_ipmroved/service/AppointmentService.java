@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 @Service
 public class AppointmentService {
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public AppointmentService(AppointmentRepository appointmentRepository, UserRepository userRepository) {
+        this.appointmentRepository = appointmentRepository;
+        this.userRepository = userRepository;
+    }
 
     // Ophalen van afspraken voor een specifieke gebruiker
     @Transactional(readOnly = true)

@@ -20,13 +20,16 @@ import java.util.List;
 @Service
 public class AdminService {
 
-    @Autowired
-    private UserRepository repository;
+    private final UserRepository repository;
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
 
-    // Bestaande methoden
+    public AdminService(UserRepository repository, AppointmentRepository appointmentRepository) {
+        this.repository = repository;
+        this.appointmentRepository = appointmentRepository;
+    }
+
+
 
     public UserResponse getUserResponseByUsername(String username) {
         var user = repository.findByUsername(username)
