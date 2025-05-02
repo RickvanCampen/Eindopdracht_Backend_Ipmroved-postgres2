@@ -28,7 +28,6 @@ public class Token {
 
     public boolean expired;
 
-    // the user_id that is linked with the token
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference

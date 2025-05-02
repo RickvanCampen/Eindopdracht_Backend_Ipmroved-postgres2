@@ -36,30 +36,27 @@ public class UserService {
 
     public User updateUser(String username, UpdateUserRequest updateUserRequest, Authentication authentication) {
         String currentUsername = authentication.getName();
-        // Controleer of de huidige gebruiker probeert zichzelf bij te werken
         if (!currentUsername.equals(username)) {
             throw new AppException("Cannot update another user's account", HttpStatus.METHOD_NOT_ALLOWED);
         }
         User existingUser = repository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        // Als de gebruikersnaam is veranderd, controleer of die al bestaat
         String newUsername = updateUserRequest.getUsername();
         if (newUsername != null && !newUsername.equals(existingUser.getUsername())) {
             Optional<User> userWithSameUsername = repository.findByUsername(newUsername);
             if (userWithSameUsername.isPresent()) {
                 throw new AppException("Username already exists", HttpStatus.CONFLICT);
             }
-            existingUser.setUsername(newUsername);  // Update de gebruikersnaam
+            existingUser.setUsername(newUsername);
         }
 
-        // Als er een nieuw wachtwoord is, update het wachtwoord
         String newPassword = updateUserRequest.getPassword();
         if (newPassword != null && !newPassword.isEmpty()) {
             String encodedPassword = passwordEncoder.encode(newPassword);
-            existingUser.setPassword(encodedPassword);  // Update het wachtwoord
+            existingUser.setPassword(encodedPassword);
         }
 
-        return repository.save(existingUser);  // Sla de bijgewerkte gebruiker op
+        return repository.save(existingUser);
     }
 }

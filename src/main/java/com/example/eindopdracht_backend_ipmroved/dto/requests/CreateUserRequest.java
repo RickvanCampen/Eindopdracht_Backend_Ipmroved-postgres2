@@ -19,5 +19,5 @@ public class CreateUserRequest {
     private String password;
 
     @JsonProperty("role")
-    private String role; // ✅ Voeg dit toe
+    private String role;
 }

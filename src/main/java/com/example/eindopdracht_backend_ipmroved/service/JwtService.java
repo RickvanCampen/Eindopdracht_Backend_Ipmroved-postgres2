@@ -1,4 +1,3 @@
-
 package com.example.eindopdracht_backend_ipmroved.service;
 
 import com.example.eindopdracht_backend_ipmroved.models.User;
@@ -22,11 +21,9 @@ public class JwtService {
 
     private final SecretKey secretKey;
 
-    // Voeg een nieuwe @Value annotatie toe om de expiration uit application.properties in te lezen
     @Value("${jwt.expiration}")
     private long expirationTime;
 
-    // Haal de geheime sleutel op uit application.properties
     public JwtService(@Value("${jwt.secret}") String secretString) {
         // Zet de secretKey om naar een SecretKey object
         this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
@@ -52,8 +49,7 @@ public class JwtService {
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        // Gebruik de expirationTime die uit de application.properties wordt geladen
-        Date expiry = new Date(nowMillis + expirationTime);  // Gebruik de dynamische expirationTime
+        Date expiry = new Date(nowMillis + expirationTime);
 
         return Jwts.builder()
                 .setClaims(extraClaims)

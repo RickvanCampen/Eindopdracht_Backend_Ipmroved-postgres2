@@ -1,4 +1,3 @@
-
 package com.example.eindopdracht_backend_ipmroved.controller;
 
 import com.example.eindopdracht_backend_ipmroved.models.User;

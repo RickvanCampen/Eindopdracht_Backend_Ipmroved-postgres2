@@ -1,4 +1,3 @@
-
 package com.example.eindopdracht_backend_ipmroved.config;
 
 import com.example.eindopdracht_backend_ipmroved.auth.JwtAuthenticationFilter;

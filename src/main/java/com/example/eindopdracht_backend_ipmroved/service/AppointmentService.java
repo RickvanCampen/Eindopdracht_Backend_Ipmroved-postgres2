@@ -8,7 +8,6 @@ import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateAppointmentR
 import com.example.eindopdracht_backend_ipmroved.dto.responses.AppointmentResponse;
 import com.example.eindopdracht_backend_ipmroved.repository.AppointmentRepository;
 import com.example.eindopdracht_backend_ipmroved.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,6 @@ public class AppointmentService {
         this.userRepository = userRepository;
     }
 
-    // Ophalen van afspraken voor een specifieke gebruiker
     @Transactional(readOnly = true)
     public List<AppointmentResponse> getAppointmentsForUser(String username) {
         User user = userRepository.findByUsername(username)
@@ -39,7 +37,6 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    // Aanmaken van een nieuwe afspraak
     @Transactional
     public AppointmentResponse createAppointment(String username, CreateAppointmentRequest request) {
         User user = userRepository.findByUsername(username)
@@ -49,7 +46,7 @@ public class AppointmentService {
                 .bicycle_name(request.getBicycleName())
                 .description(request.getDescription())
                 .date_time(request.getDateTime())
-                .attachment(request.getAttachment()) // <-- Attachment zetten!
+                .attachment(request.getAttachment())
                 .user(user)
                 .build();
 
@@ -57,7 +54,6 @@ public class AppointmentService {
         return AppointmentResponse.from(savedAppointment);
     }
 
-    // Bijwerken van een bestaande afspraak
     @Transactional
     public AppointmentResponse updateAppointment(String username, int id, UpdateAppointmentRequest request) {
         User user = userRepository.findByUsername(username)
@@ -69,13 +65,12 @@ public class AppointmentService {
         appointment.setBicycle_name(request.getBicycleName());
         appointment.setDescription(request.getDescription());
         appointment.setDate_time(request.getDateTime());
-        appointment.setAttachment(request.getAttachment()); // <-- Attachment bijwerken!
+        appointment.setAttachment(request.getAttachment());
 
         Appointment updatedAppointment = appointmentRepository.save(appointment);
         return AppointmentResponse.from(updatedAppointment);
     }
 
-    // Verwijderen van een afspraak
     @Transactional
     public void deleteAppointment(String username, int id) {
         User user = userRepository.findByUsername(username)

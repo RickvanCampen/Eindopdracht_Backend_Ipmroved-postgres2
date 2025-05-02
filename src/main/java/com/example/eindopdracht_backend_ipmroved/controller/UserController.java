@@ -27,11 +27,11 @@ public class UserController {
 
     @PutMapping("/update")
     public ResponseEntity<UserResponse> updateUser(
-            @RequestBody UpdateUserRequest request,  // UpdateUserRequest ontvangen via @RequestBody
+            @RequestBody UpdateUserRequest request,
             Authentication authentication) {
         String username = authentication.getName();
-        User updatedUser = service.updateUser(username, request, authentication);  // UserService update
-        UserResponse response = UserResponse.from(updatedUser);  // Convert de User naar een response
+        User updatedUser = service.updateUser(username, request, authentication);
+        UserResponse response = UserResponse.from(updatedUser);
         return ResponseEntity.ok(response);
     }
 }

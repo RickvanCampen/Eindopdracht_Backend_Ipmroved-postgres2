@@ -9,7 +9,6 @@ import com.example.eindopdracht_backend_ipmroved.dto.responses.UserResponse;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.AppointmentResponse;
 import com.example.eindopdracht_backend_ipmroved.repository.UserRepository;
 import com.example.eindopdracht_backend_ipmroved.repository.AppointmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
