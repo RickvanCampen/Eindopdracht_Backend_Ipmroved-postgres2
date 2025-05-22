@@ -18,14 +18,14 @@ public class UserController {
         this.service = service;
     }
 
-    @GetMapping("/details")
+    @GetMapping("")
     public ResponseEntity<UserResponse> getUserProfile(Authentication authentication) {
         String username = authentication.getName();
         UserResponse response = service.getUserProfile(username);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update")
+    @PutMapping("")
     public ResponseEntity<UserResponse> updateUser(
             @RequestBody UpdateUserRequest request,
             Authentication authentication) {

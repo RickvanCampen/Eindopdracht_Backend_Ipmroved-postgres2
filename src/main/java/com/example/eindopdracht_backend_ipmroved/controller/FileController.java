@@ -17,7 +17,7 @@ public class FileController {
 
     private final FileService fileService;
 
-    @PostMapping("/upload")
+    @PostMapping("")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             File savedFile = fileService.storeFile(file);
@@ -27,7 +27,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("/download/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         File file = fileService.getFileById(id);
 

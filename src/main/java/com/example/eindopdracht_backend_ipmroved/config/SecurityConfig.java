@@ -4,6 +4,7 @@ import com.example.eindopdracht_backend_ipmroved.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,7 +31,9 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
-                .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "api/v1/users", "api/v1/appointments/**").hasRole("USER")
+                .antMatchers("api/v1/users/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/api/v1/admin/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
@@ -48,3 +51,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

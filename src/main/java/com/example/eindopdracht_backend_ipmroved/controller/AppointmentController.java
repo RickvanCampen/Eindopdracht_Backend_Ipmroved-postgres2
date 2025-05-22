@@ -20,14 +20,14 @@ public class AppointmentController {
         this.service = service;
     }
 
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<List<AppointmentResponse>> getAllAppointments(Authentication authentication) {
         String username = authentication.getName();
         List<AppointmentResponse> responses = service.getAppointmentsForUser(username);
         return ResponseEntity.ok(responses);
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<AppointmentResponse> createAppointment(
             @RequestBody CreateAppointmentRequest request,
             Authentication authentication) {
@@ -36,7 +36,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<AppointmentResponse> updateAppointment(
             @PathVariable int id,
             @RequestBody UpdateAppointmentRequest request,
@@ -46,7 +46,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteAppointment(
             @PathVariable int id,
             Authentication authentication) {
