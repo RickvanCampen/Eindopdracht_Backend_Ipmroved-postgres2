@@ -3,30 +3,33 @@ package com.example.eindopdracht_backend_ipmroved.controller;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.CreateAppointmentRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateAppointmentRequest;
 import com.example.eindopdracht_backend_ipmroved.models.Appointment;
+import com.example.eindopdracht_backend_ipmroved.models.Role;
+import com.example.eindopdracht_backend_ipmroved.models.Token;
 import com.example.eindopdracht_backend_ipmroved.models.User;
 import com.example.eindopdracht_backend_ipmroved.repository.AppointmentRepository;
+import com.example.eindopdracht_backend_ipmroved.repository.TokenRepository;
 import com.example.eindopdracht_backend_ipmroved.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.eindopdracht_backend_ipmroved.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = "spring.config.name=application-test")
-@AutoConfigureMockMvc
-class AppointmentControllerIT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class AppointmentControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private UserRepository userRepository;
@@ -35,87 +38,173 @@ class AppointmentControllerIT {
     private AppointmentRepository appointmentRepository;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private TokenRepository tokenRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     private User testUser;
+    private String jwtToken;
 
     @BeforeEach
     void setup() {
         appointmentRepository.deleteAll();
+        tokenRepository.deleteAll();
         userRepository.deleteAll();
 
-        testUser = new User();
-        testUser.setUsername("User1");
-        testUser.setPassword("password");
+        testUser = User.builder()
+                .username("testuser")
+                .password(passwordEncoder.encode("password"))
+                .role(Role.USER)
+                .build();
+
         userRepository.save(testUser);
+
+        jwtToken = jwtService.generateToken(testUser);
+
+        tokenRepository.save(
+                Token.builder()
+                        .token(jwtToken)
+                        .expired(false)
+                        .revoked(false)
+                        .user(testUser)
+                        .build()
+        );
     }
 
     @Test
-    @WithMockUser(username = "User1")
-    void createAndGetAppointment() throws Exception {
-        CreateAppointmentRequest request = new CreateAppointmentRequest();
-        request.setBicycleName("Gazelle");
-        request.setDescription("Test Description");
-        request.setDateTime(LocalDateTime.now().plusDays(1));
-        request.setAttachment("test.pdf");
+    void createAppointment_returnsCreatedAppointment() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // POST /api/v1/appointments
-        mockMvc.perform(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.bicycle_name").value("Gazelle"));
+        CreateAppointmentRequest request = CreateAppointmentRequest.builder()
+                .bicycleName("Gazelle")
+                .description("Onderhoud")
+                .dateTime(LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS))
+                .attachment(null)
+                .build();
 
-        // GET /api/v1/appointments
-        mockMvc.perform(get("/api/v1/appointments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+        HttpEntity<CreateAppointmentRequest> requestEntity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                createURL("/api/v1/appointments"),
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("Gazelle");
+        assertThat(response.getBody()).contains("Onderhoud");
+
+        List<Appointment> appointments = appointmentRepository.findAll();
+        assertThat(appointments).hasSize(1);
+        assertThat(appointments.get(0).getBicycle_name()).isEqualTo("Gazelle");
     }
 
     @Test
-    @WithMockUser(username = "User1")
-    void updateAppointment() throws Exception {
+    void getAllAppointments_returnsListOfAppointments() {
+        Appointment appointment = Appointment.builder()
+                .bicycle_name("Gazelle")
+                .description("Check-up")
+                .date_time(LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS))
+                .user(testUser)
+                .attachment(null)
+                .build();
+        appointmentRepository.save(appointment);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                createURL("/api/v1/appointments"),
+                HttpMethod.GET,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("Gazelle");
+        assertThat(response.getBody()).contains("Check-up");
+    }
+
+    @Test
+    void updateAppointment_updatesAndReturnsUpdatedAppointment() {
         Appointment appointment = Appointment.builder()
                 .bicycle_name("OldBike")
-                .description("Old desc")
-                .date_time(LocalDateTime.now().plusDays(1))
-                .attachment("old.pdf")
+                .description("Old Description")
+                .date_time(LocalDateTime.now().plusDays(3).truncatedTo(ChronoUnit.SECONDS))
                 .user(testUser)
+                .attachment(null)
                 .build();
-        appointment = appointmentRepository.save(appointment);
+        appointmentRepository.save(appointment);
 
-        UpdateAppointmentRequest request = new UpdateAppointmentRequest();
-        request.setBicycleName("NewBike");
-        request.setDescription("Updated");
-        request.setDateTime(LocalDateTime.now().plusDays(2));
-        request.setAttachment("new.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // PUT /api/v1/appointments/{id}
-        mockMvc.perform(put("/api/v1/appointments/" + appointment.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.bicycle_name").value("NewBike"));
+        UpdateAppointmentRequest updateRequest = UpdateAppointmentRequest.builder()
+                .bicycleName("NewBike")
+                .description("Updated Description")
+                .dateTime(LocalDateTime.now().plusDays(4).truncatedTo(ChronoUnit.SECONDS))
+                .attachment(null)
+                .build();
+
+        HttpEntity<UpdateAppointmentRequest> requestEntity = new HttpEntity<>(updateRequest, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                createURL("/api/v1/appointments/" + appointment.getId()),
+                HttpMethod.PUT,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("NewBike");
+        assertThat(response.getBody()).contains("Updated Description");
+
+        var updatedAppointment = appointmentRepository.findById(appointment.getId());
+        assertThat(updatedAppointment).isPresent();
+        assertThat(updatedAppointment.get().getBicycle_name()).isEqualTo("NewBike");
     }
 
     @Test
-    @WithMockUser(username = "User1")
-    void deleteAppointment() throws Exception {
+    void deleteAppointment_removesAppointment() {
         Appointment appointment = Appointment.builder()
                 .bicycle_name("ToDelete")
-                .description("Desc")
-                .date_time(LocalDateTime.now().plusDays(1))
-                .attachment("del.pdf")
+                .description("Description")
+                .date_time(LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.SECONDS))
                 .user(testUser)
+                .attachment(null)
                 .build();
-        appointment = appointmentRepository.save(appointment);
+        appointmentRepository.save(appointment);
 
-        // DELETE /api/v1/appointments/{id}
-        mockMvc.perform(delete("/api/v1/appointments/" + appointment.getId()))
-                .andExpect(status().isOk());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
 
-        mockMvc.perform(get("/api/v1/appointments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                createURL("/api/v1/appointments/" + appointment.getId()),
+                HttpMethod.DELETE,
+                requestEntity,
+                Void.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(appointmentRepository.findById(appointment.getId())).isNotPresent();
+    }
+
+    private String createURL(String uri) {
+        return "http://localhost:" + port + uri;
     }
 }
