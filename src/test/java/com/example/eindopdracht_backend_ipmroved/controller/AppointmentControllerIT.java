@@ -59,15 +59,15 @@ class AppointmentControllerIT {
         request.setDateTime(LocalDateTime.now().plusDays(1));
         request.setAttachment("test.pdf");
 
-        // POST
-        mockMvc.perform(post("/api/v1/appointments/create")
+        // POST /api/v1/appointments
+        mockMvc.perform(post("/api/v1/appointments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bicycle_name").value("Gazelle"));
 
-        // GET
-        mockMvc.perform(get("/api/v1/appointments/all"))
+        // GET /api/v1/appointments
+        mockMvc.perform(get("/api/v1/appointments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
@@ -90,8 +90,8 @@ class AppointmentControllerIT {
         request.setDateTime(LocalDateTime.now().plusDays(2));
         request.setAttachment("new.pdf");
 
-        // PUT
-        mockMvc.perform(put("/api/v1/appointments/update/" + appointment.getId())
+        // PUT /api/v1/appointments/{id}
+        mockMvc.perform(put("/api/v1/appointments/" + appointment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -110,11 +110,11 @@ class AppointmentControllerIT {
                 .build();
         appointment = appointmentRepository.save(appointment);
 
-        // DELETE
-        mockMvc.perform(delete("/api/v1/appointments/delete/" + appointment.getId()))
+        // DELETE /api/v1/appointments/{id}
+        mockMvc.perform(delete("/api/v1/appointments/" + appointment.getId()))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/appointments/all"))
+        mockMvc.perform(get("/api/v1/appointments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }

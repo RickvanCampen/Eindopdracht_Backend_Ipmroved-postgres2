@@ -1,11 +1,12 @@
 package com.example.eindopdracht_backend_ipmroved.service;
 
-import com.example.eindopdracht_backend_ipmroved.exceptions.AppException;
-import com.example.eindopdracht_backend_ipmroved.models.Appointment;
-import com.example.eindopdracht_backend_ipmroved.models.User;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.CreateAppointmentRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateAppointmentRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.AppointmentResponse;
+import com.example.eindopdracht_backend_ipmroved.exceptions.AppException;
+import com.example.eindopdracht_backend_ipmroved.mapper.AppointmentMapper;
+import com.example.eindopdracht_backend_ipmroved.models.Appointment;
+import com.example.eindopdracht_backend_ipmroved.models.User;
 import com.example.eindopdracht_backend_ipmroved.repository.AppointmentRepository;
 import com.example.eindopdracht_backend_ipmroved.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-
     private final UserRepository userRepository;
 
     public AppointmentService(AppointmentRepository appointmentRepository, UserRepository userRepository) {
@@ -31,9 +31,9 @@ public class AppointmentService {
     public List<AppointmentResponse> getAppointmentsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
-        List<Appointment> appointments = appointmentRepository.findByUser(user);
-        return appointments.stream()
-                .map(AppointmentResponse::from)
+
+        return appointmentRepository.findByUser(user).stream()
+                .map(AppointmentMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -42,16 +42,10 @@ public class AppointmentService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        Appointment appointment = Appointment.builder()
-                .bicycle_name(request.getBicycleName())
-                .description(request.getDescription())
-                .date_time(request.getDateTime())
-                .attachment(request.getAttachment())
-                .user(user)
-                .build();
-
+        Appointment appointment = AppointmentMapper.toEntity(request, user);
         Appointment savedAppointment = appointmentRepository.save(appointment);
-        return AppointmentResponse.from(savedAppointment);
+
+        return AppointmentMapper.toResponse(savedAppointment);
     }
 
     @Transactional
@@ -62,13 +56,10 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException("Appointment not found", HttpStatus.NOT_FOUND));
 
-        appointment.setBicycle_name(request.getBicycleName());
-        appointment.setDescription(request.getDescription());
-        appointment.setDate_time(request.getDateTime());
-        appointment.setAttachment(request.getAttachment());
-
+        AppointmentMapper.updateEntity(appointment, request);
         Appointment updatedAppointment = appointmentRepository.save(appointment);
-        return AppointmentResponse.from(updatedAppointment);
+
+        return AppointmentMapper.toResponse(updatedAppointment);
     }
 
     @Transactional
