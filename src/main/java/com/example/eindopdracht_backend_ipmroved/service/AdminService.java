@@ -20,7 +20,6 @@ import java.util.List;
 public class AdminService {
 
     private final UserRepository repository;
-
     private final AppointmentRepository appointmentRepository;
 
     public AdminService(UserRepository repository, AppointmentRepository appointmentRepository) {
@@ -28,9 +27,7 @@ public class AdminService {
         this.appointmentRepository = appointmentRepository;
     }
 
-
-
-    public UserResponse getUserResponseByUsername(String username) {
+    public UserResponse getUserProfile(String username) {
         var user = repository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
         return UserResponse.from(user);
@@ -58,7 +55,7 @@ public class AdminService {
         if (existingUser.getRole() == Role.ADMIN) {
             throw new AppException("Cannot update an admin's role", HttpStatus.METHOD_NOT_ALLOWED);
         }
-        existingUser.setRole(updateUserRoleRequest.getRole()); // Set de nieuwe rol correct
+        existingUser.setRole(updateUserRoleRequest.getRole());
         return repository.save(existingUser);
     }
 
@@ -72,3 +69,4 @@ public class AdminService {
         return appointmentResponses;
     }
 }
+

@@ -24,19 +24,23 @@ public class AdminController {
         this.service = service;
     }
 
-    @GetMapping("/details/{username}")
-    public ResponseEntity<UserResponse> getUserProfile(
-            @PathVariable String username) {
-        UserResponse response = service.getUserResponseByUsername(username);
+    @GetMapping("")
+    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        String username = authentication.getName();
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return ResponseEntity.ok(service.getAllUserResponses());
+        }
+        UserResponse response = service.getUserProfile(username);
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/details/all")
     public List<UserResponse> getAllUsers() {
         return service.getAllUserResponses();
     }
 
-    @PutMapping("/update_role/{username}")
+    @PutMapping("{username}")
     public ResponseEntity<UserResponse> updateUserRole(
             @PathVariable String username,
             @RequestBody UpdateUserRoleRequest request,
