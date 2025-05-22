@@ -4,6 +4,7 @@ import com.example.eindopdracht_backend_ipmroved.models.User;
 import com.example.eindopdracht_backend_ipmroved.dto.requests.UpdateUserRequest;
 import com.example.eindopdracht_backend_ipmroved.dto.responses.UserResponse;
 import com.example.eindopdracht_backend_ipmroved.service.UserService;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class UserController {
 
     @PutMapping("/update")
     public ResponseEntity<UserResponse> updateUser(
-            @RequestBody UpdateUserRequest request,
+            @Valid @RequestBody UpdateUserRequest request,
             Authentication authentication) {
         String username = authentication.getName();
         User updatedUser = service.updateUser(username, request, authentication);

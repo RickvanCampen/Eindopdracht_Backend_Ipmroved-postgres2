@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,7 +30,7 @@ public class AppointmentController {
 
     @PostMapping("/create")
     public ResponseEntity<AppointmentResponse> createAppointment(
-            @RequestBody CreateAppointmentRequest request,
+            @Valid @RequestBody CreateAppointmentRequest request,
             Authentication authentication) {
         String username = authentication.getName();
         AppointmentResponse response = service.createAppointment(username, request);
@@ -39,7 +40,7 @@ public class AppointmentController {
     @PutMapping("/update/{id}")
     public ResponseEntity<AppointmentResponse> updateAppointment(
             @PathVariable int id,
-            @RequestBody UpdateAppointmentRequest request,
+            @Valid @RequestBody UpdateAppointmentRequest request,
             Authentication authentication) {
         String username = authentication.getName();
         AppointmentResponse response = service.updateAppointment(username, id, request);
