@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -43,7 +44,7 @@ public class AdminController {
     @PutMapping("{username}")
     public ResponseEntity<UserResponse> updateUserRole(
             @PathVariable String username,
-            @RequestBody UpdateUserRoleRequest request,
+            @Valid @RequestBody UpdateUserRoleRequest request,
             Authentication authentication) {
         User updatedUser = service.updateUserRole(username, request, authentication);
         UserResponse response = UserResponse.from(updatedUser);
@@ -57,6 +58,3 @@ public class AdminController {
         return ResponseEntity.ok(appointments);
     }
 }
-
-
-
