@@ -20,7 +20,7 @@ public class TokenService {
         return tokenRepository.findAll();
     }
 
-    public Optional<Token> getTokenById(Long id) { // Verander int naar Long
+    public Optional<Token> getTokenById(Long id) {
         return tokenRepository.findById(id);
     }
 
@@ -30,5 +30,25 @@ public class TokenService {
 
     public Token saveToken(Token token) {
         return tokenRepository.save(token);
+    }
+
+    // Nieuwe method om alle tokens van een gebruiker te revoken en te markeren als expired
+    public void revokeAllUserTokens(Integer userId) {
+        List<Token> validTokens = tokenRepository.findAllValidTokenByUser(userId);
+        for (Token token : validTokens) {
+            token.setRevoked(true);
+            token.setExpired(true);
+            tokenRepository.save(token);
+        }
+    }
+
+    // Nieuwe method om één token te revoken en te markeren als expired
+    public void revokeToken(String tokenValue) {
+        Optional<Token> tokenOpt = tokenRepository.findByToken(tokenValue);
+        tokenOpt.ifPresent(token -> {
+            token.setRevoked(true);
+            token.setExpired(true);
+            tokenRepository.save(token);
+        });
     }
 }
